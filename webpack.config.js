@@ -8,7 +8,7 @@ const plugins = () => {
     const base = [new HtmlWebpackPlugin({
             template: './index.html',
             minify: {
-                collapseWhitespace: isProd
+                collapseWhitespace: isProdMode
             }
         }),]
 
@@ -41,7 +41,7 @@ module.exports = {
     },
     devServer: {
         port: 4200,
-        hot: isDev
+        hot: isDevMode
     },
     output: {
         filename: filename('js'),
