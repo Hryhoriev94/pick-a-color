@@ -1,21 +1,33 @@
 const path = require('path');
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const isDevMode = process.env.NODE_ENV === 'development';
 const isProdMode = !isDevMode;
+
+const filename = extension => isDevMode ? `[name].${extension}` : `[name].[hash].${extension}`;
 const plugins = () => {
-    const base = [new HtmlWebpackPlugin({
+    const base = [
+        new HtmlWebpackPlugin({
             template: './index.html',
             minify: {
                 collapseWhitespace: isProdMode
             }
-        }),]
+        }),
+        new MiniCssExtractPlugin({
+            filename: filename('css')
+        })
+    ]
 
     return base
 }
-const filename = extension => isDevMode ? `[name].${extension}` : `[name].[hash].${extension}`;
 
+
+const styleLoader = extension => {
+    const styleLoaders = ['style-loader', 'css-loader',]
+    if(extension) styleLoaders.push(extension)
+    return styleLoaders
+}
 
 const babelOptions = preset => {
     const opts = {
@@ -47,6 +59,9 @@ module.exports = {
         filename: filename('js'),
         path: path.resolve(__dirname, 'dist')
     },
+    resolve: {
+        extensions: ['.ts', '.js'],
+    },
     plugins: plugins(),
     module: {
         rules: [
@@ -57,6 +72,14 @@ module.exports = {
                     loader: 'babel-loader',
                     options: babelOptions('@babel/preset-typescript')
                 }
+            },
+            {
+                test: /\.css$/,
+                use: styleLoader(),
+            },
+            {
+                test: /\.s[ac]ss$/,
+                use: styleLoader('sass-loader', 'sass')
             },
         ]
     }

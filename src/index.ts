@@ -1,39 +1,10 @@
-const app: HTMLElement = document.querySelector('#app');
+import './assets/styles/_style.scss'
+import {isDark} from "./assets/scripts/functions.ts";
+import {generateColors, spaceHandler} from "./assets/scripts/dom";
 
-interface  addElementParameters {
-    parent?: HTMLElement,
-    tag?: string,
-    content?: string | HTMLElement,
-    classNames?: string | string[],
-    place?: 'append' | 'prepend' | 'before' | 'after'
-}
+spaceHandler();
+generateColors()
 
-
-const addElement = ({parent = app, classNames = ['colorBlock'], tag = 'div', content = '', place = 'append'} : addElementParameters): void => {
-    const newElement = document.createElement(tag);
-    if(classNames) {
-        if(typeof classNames === 'string') {
-            newElement.classList.add(classNames);
-        }
-    }
-    switch (place) {
-        case 'append' :
-            parent.append(newElement);
-            break;
-        case 'prepend' :
-            parent.prepend(newElement);
-            break;
-        case 'before' :
-            parent.before(newElement);
-            break;
-        case 'after' :
-            parent.after(newElement);
-            break;
-    }
-}
-
-for(let i = 0; i < 10; i++) {
-    addElement({parent: app, tag: 'div', classNames: `${i}`});
-}
+isDark([0, 128, 255]);
 
 
