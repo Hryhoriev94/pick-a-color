@@ -1,4 +1,5 @@
 import {classNames, Content} from "./types";
+import {ColorBlock} from "./ColorBlock";
 
 
 export interface IColorBlockClassNames {
@@ -12,9 +13,11 @@ export interface IColorBlockClassNames {
 export interface IApp {
     colorElements: [],
     quantityElements: [],
-    allElements: [],
-    lockedElements: [],
-    unlockedElements: []
+    allElements: ColorBlock[],
+    lockedElements: ColorBlock[],
+    unlockedElements: ColorBlock[],
+
+    refreshColors(): void;
 }
 
 export interface addElementParameters {

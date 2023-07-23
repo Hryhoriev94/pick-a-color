@@ -1,6 +1,6 @@
 import {hexColor, rgbColor} from "./types";
 import {IColorBlock, IColorBlockClassNames} from "./interfaces";
-import {isDark, rgbToHex} from "./functions";
+import {getRandomColor, isDark, rgbToHex} from "./functions";
 import {addElement} from "./dom";
 
 export class ColorBlock implements IColorBlock {
@@ -13,7 +13,6 @@ export class ColorBlock implements IColorBlock {
     colorNames: HTMLElement;
     button: HTMLElement;
     icon: HTMLElement;
-
     classes: IColorBlockClassNames;
 
     constructor(color: rgbColor, isLocked: boolean) {
@@ -85,4 +84,26 @@ export class ColorBlock implements IColorBlock {
         this.icon.classList.add(...iconClasses);
     }
 
+    updateContent(element: HTMLElement, content: string | HTMLElement | rgbColor):void {
+            if(typeof content === 'string') {
+              element.innerHTML = content
+            } else if(content instanceof  HTMLElement) {
+                element.children[0].remove();
+                element.append(content);
+            }
+    }
+
+    updateColor(color?: rgbColor): void {
+        this.color = color ? color : getRandomColor();
+        this.hexColor = rgbToHex(this.color);
+
+        this.updateContent(this.rgbName, `rgb(${this.color})`);
+        this.updateContent(this.hexName, this.hexColor);
+
+        this.body.style.backgroundColor = `rgb(${this.color})`;
+    }
+
+    get IsLocked(): boolean {
+        return this.isLocked
+    }
 }

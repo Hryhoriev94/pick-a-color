@@ -1,9 +1,8 @@
 import './assets/styles/_style.scss'
 import {isDark} from "./assets/scripts/functions.ts";
-import {generateColors, spaceHandler} from "./assets/scripts/dom";
+import {App} from "./assets/scripts/dom";
 
-spaceHandler();
-generateColors()
+new App();
 
 isDark([0, 128, 255]);
 

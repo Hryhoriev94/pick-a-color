@@ -37,59 +37,46 @@ export const addElement = ({parent = app, classNames = null, tag = 'div',  conte
     return newElement;
 }
 
-export const createColorBlock = (color = null, isLocked = false) => {
-    color = color ? color : getRandomColor();
-
-    const colorBlock = new ColorBlock(color, isLocked);
-
-    return colorBlock;
-}
-
 export const getQuantityColors = (): number => {
     const input = document.querySelector('.colors-quantity') as HTMLInputElement ;
     if(input == null) return 1;
     return parseInt(input?.value);
 }
 
-export const generateColors = (init = true) => {
-    const lockedColors:NodeList = getLockedColors();
-    const unlockedColors:NodeList = getUnlockedColors();
-
-    const quantity = getQuantityColors() - lockedColors.length;
-
-    unlockedColors.forEach(unlockedColor => (unlockedColor as Element).remove());
-
-    for(let i = 0; i < quantity; i++) {
-        createColorBlock()
-    }
-}
-
-export const getAllColorsBlocks = (): NodeList => {
-    return document.querySelectorAll('#colors .color');
-}
-
-export const getLockedColors = ():NodeList => {
-    return document.querySelectorAll('#colors .color-locked');
-}
-
-export const getUnlockedColors = () : NodeList => {
-    return document.querySelectorAll('#colors .color:not(.color-locked)');
-}
-
-export const spaceHandler = () => {
-    window.addEventListener('keydown', (e) => {
-        if(e.code === 'Space') generateColors();
-    })
-    return;
-}
 
 export class App implements IApp {
     colorElements;
     quantityElements;
-    allElements;
-    lockedElements;
-    unlockedElements;
+    allElements: ColorBlock[] = [];
+    lockedElements: ColorBlock[] = [];
+    unlockedElements: ColorBlock[] = [];
     constructor() {
-
+        this.quantityElements = getQuantityColors() - this.lockedElements.length;
+        this.init();
+    }
+    init() {
+        for(let i = 0; i < this.quantityElements; i++) {
+            this.createColorBlock(null, false);
+        }
+        this.keydownHandler();
+    }
+    createColorBlock(color = null, isLocked = false) {
+        color = color ? color : getRandomColor();
+        const colorBlock = new ColorBlock(color, isLocked);
+        this.allElements.push(colorBlock);
+        colorBlock.isLocked ? this.lockedElements.push(colorBlock) : this.unlockedElements.push(colorBlock);
+    }
+    refreshColors() {
+        this.allElements.forEach(colorBlock => {
+            if(!colorBlock.isLocked) colorBlock.updateColor();
+        })
+    }
+    keydownHandler() {
+        window.addEventListener('keydown', (e) => {
+            e.preventDefault();
+            if(e.code === 'Space') {
+                this.refreshColors();
+            }
+        })
     }
 }

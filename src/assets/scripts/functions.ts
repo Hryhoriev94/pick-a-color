@@ -26,8 +26,6 @@ export const rgbToHex = (rgb: number[]): hexColor => {
     return '#'+rgb.reduce((acc, currentValue) => acc + padZero(toHex(currentValue)),'');
 }
 
-
-
 export const hexToRGB = (hexString):rgbColor => {
     hexString = hexString.replace('#', '');
     const rgbArray = hexString.split('').reduce((acc, char, index) => {
