@@ -1,24 +1,26 @@
 import {hexColor, rgbColor} from "./types";
 import {IColorBlock, IColorBlockClassNames} from "./interfaces";
 import {getRandomColor, isDark, rgbToHex} from "./functions";
-import {addElement} from "./dom";
+import {addElement, App} from "./dom";
 
 export class ColorBlock implements IColorBlock {
+    app: App;
     color: rgbColor;
     hexColor: hexColor;
     body: HTMLElement;
     rgbName: HTMLElement;
     hexName: HTMLElement;
-    isLocked: boolean;
+    private _isLocked: boolean;
     colorNames: HTMLElement;
     button: HTMLElement;
     icon: HTMLElement;
     classes: IColorBlockClassNames;
 
-    constructor(color: rgbColor, isLocked: boolean) {
+    constructor(color: rgbColor = getRandomColor(), isLocked: boolean, app: App) {
+        this.app = app;
         this.color = color;
         this.hexColor = rgbToHex(this.color);
-        this.isLocked = isLocked;
+        this._isLocked = isLocked;
         this.classes = {
             colorBlockClasses: [...this.getBodyClassNames()],
             colorNames: 'color-names',
@@ -30,7 +32,7 @@ export class ColorBlock implements IColorBlock {
     }
 
     init():void {
-        this.body = addElement({parent: document.querySelector('#colors'), classNames: this.classes.colorBlockClasses});
+        this.body = addElement({parent: this.app.colorContainer, classNames: this.classes.colorBlockClasses});
         this.colorNames = addElement({parent: this.body, classNames: this.classes.colorNames});
         this.rgbName = addElement({
             parent: this.colorNames,
@@ -49,9 +51,16 @@ export class ColorBlock implements IColorBlock {
 
         this.body.style.backgroundColor = `rgb(${this.color})`;
         this.button.addEventListener('click', () => {
-            this.isLocked = !this.isLocked;
-            this.updateLockState();
+            this.IsLocked = !this.IsLocked;
         })
+        this.copyColorHandler();
+
+    }
+
+    private setStylesAndClasses() {
+        this.body.style.backgroundColor = `rgb(${this.color})`;
+        this.body.className = '';
+        this.body.classList.add(...this.getBodyClassNames());
     }
 
     getBodyClassNames(): string[] {
@@ -59,17 +68,21 @@ export class ColorBlock implements IColorBlock {
         if (isDark(this.color)) {
             classNames.push('dark')
         }
-        if (this.isLocked) {
+        if (this.IsLocked) {
             classNames.push('color-locked')
         }
         return classNames;
     }
 
     getIconClasses(): string[] {
-        return this.isLocked ? ['fa-solid', 'fa-lock'] : ['fa-solid', 'fa-lock-open']
+        return this.IsLocked ? ['fa-solid', 'fa-lock'] : ['fa-solid', 'fa-lock-open']
     }
 
     updateLockState():void {
+
+
+        this.app.lockedElements = this.app.allElements.filter(colorBlock => colorBlock.IsLocked)
+        this.app.unlockedElements = this.app.allElements.filter(colorBlock => !colorBlock.IsLocked)
 
         const colorBlockClasses = [...this.getBodyClassNames()]
         const iconClasses = this.getIconClasses();
@@ -94,6 +107,7 @@ export class ColorBlock implements IColorBlock {
     }
 
     updateColor(color?: rgbColor): void {
+
         this.color = color ? color : getRandomColor();
         this.hexColor = rgbToHex(this.color);
 
@@ -107,7 +121,43 @@ export class ColorBlock implements IColorBlock {
         this.body.classList.add(...colorBlockClasses);
     }
 
+    copyColor(element: HTMLElement) {
+        return navigator.clipboard.writeText(element.innerText);
+    }
+
+    copyColorHandler() {
+        this.rgbName.addEventListener('click', () => {
+            this.copyColor(this.rgbName);
+        })
+        this.hexName.addEventListener('click', () => {
+            this.copyColor(this.hexName);
+        })
+    }
+    remove() {
+        if (this.IsLocked) {
+            return;
+        }
+
+        this.body.remove();
+
+        const index = this.app.allElements.indexOf(this);
+        if (index > -1) {
+            this.app.allElements.splice(index, 1);
+        }
+
+        const unlockedIndex = this.app.unlockedElements.indexOf(this);
+        if (unlockedIndex > -1) {
+            this.app.unlockedElements.splice(unlockedIndex, 1);
+        }
+    }
+
+    set IsLocked(lockState: boolean) {
+        this._isLocked = lockState;
+        this.updateLockState();
+        this.app.updateMinQuantity();
+    }
+
     get IsLocked(): boolean {
-        return this.isLocked
+        return this._isLocked
     }
 }

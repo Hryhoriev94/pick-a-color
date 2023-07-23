@@ -1,75 +1,98 @@
 import {getRandomColor} from "./functions";
 import {addElementParameters, IApp} from "./interfaces";
 import {ColorBlock} from "./ColorBlock";
+import {rgbColor} from "./types";
 
 export const app: HTMLElement = document.querySelector('#app');
 
-export const addElement = ({parent = app, classNames = null, tag = 'div',  content = '', place = 'append'} : addElementParameters) : HTMLElement => {
+export const addElement = ({parent = app, classNames = null, tag = 'div', content = '', place = 'append'}: addElementParameters): HTMLElement => {
     const newElement = document.createElement(tag);
+
     if (classNames) {
-        if (typeof classNames === 'string') {
-            newElement.classList.add(classNames);
-        } else if(Array.isArray(classNames)) {
-            newElement.classList.add(...classNames)
-        }
+        newElement.classList.add(...Array.isArray(classNames) ? classNames : [classNames]);
     }
-    if(content) {
-        if(typeof content === 'string') {
-            newElement.innerHTML = content;
-        } else {
-            newElement.append(content)
-        }
+
+    if (content) {
+        newElement.innerHTML = typeof content === 'string' ? content : '';
+        if (!(typeof content === 'string') && content instanceof HTMLElement) newElement.append(content);
     }
-    switch (place) {
-        case 'append' :
-            parent.append(newElement);
-            break;
-        case 'prepend' :
-            parent.prepend(newElement);
-            break;
-        case 'before' :
-            parent.before(newElement);
-            break;
-        case 'after' :
-            parent.after(newElement);
-            break;
+
+    const placementMethods = {
+        'append': 'append',
+        'prepend': 'prepend',
+        'before': 'before',
+        'after': 'after'
+    };
+
+    if (parent) {
+        parent[placementMethods[place]](newElement);
     }
+
     return newElement;
 }
 
-export const getQuantityColors = (): number => {
-    const input = document.querySelector('.colors-quantity') as HTMLInputElement ;
-    if(input == null) return 1;
-    return parseInt(input?.value);
-}
+
+
+
 
 
 export class App implements IApp {
-    colorElements;
+    colorContainer: HTMLElement;
     quantityElements;
     allElements: ColorBlock[] = [];
     lockedElements: ColorBlock[] = [];
     unlockedElements: ColorBlock[] = [];
+    minQuantity: number;
+    maxQuantity: number;
+    currentQuantity: number;
+    inputQuantity: HTMLInputElement;
+    labelQuantity: HTMLElement;
+    refreshButton: HTMLButtonElement;
     constructor() {
-        this.quantityElements = getQuantityColors() - this.lockedElements.length;
+        this.inputQuantity = document.querySelector('#colors-quantity');
+        this.minQuantity = this.lockedElements.length;
+        this.currentQuantity = this.getQuantityColors();
+        this.labelQuantity = document.querySelector('.quantity label');
+        this.labelQuantity.innerText = this.currentQuantity.toString();
+        this.lockedElements = [];
+        this.unlockedElements = [];
+        this.colorContainer = document.querySelector('#colors');
+        this.refreshButton = document.querySelector('#all-refresh');
         this.init();
     }
     init() {
-        for(let i = 0; i < this.quantityElements; i++) {
-            this.createColorBlock(null, false);
+        let hash = window.location.hash.substr(1);
+        if (hash) {
+            let colorsString = atob(hash);
+            let colors = JSON.parse(colorsString);
+            this.createColorBlocks(colors);
+        } else {
+            this.createColorBlocks(this.currentQuantity);
         }
         this.keydownHandler();
+        this.quantityInputHandler();
+        this.updateHash()
     }
-    createColorBlock(color = null, isLocked = false) {
-        color = color ? color : getRandomColor();
-        const colorBlock = new ColorBlock(color, isLocked);
+    createColorBlock(color = getRandomColor(), isLocked = false) {
+        const colorBlock = new ColorBlock(color, isLocked, this);
         this.allElements.push(colorBlock);
-        colorBlock.isLocked ? this.lockedElements.push(colorBlock) : this.unlockedElements.push(colorBlock);
+        (isLocked ? this.lockedElements : this.unlockedElements).push(colorBlock);
+    }
+    createColorBlocks(colorsOrQuantity: number | rgbColor[]) {
+        if (typeof colorsOrQuantity === 'number') {
+            for (let i = 0; i < colorsOrQuantity; i++) {
+                this.createColorBlock();
+            }
+        } else {
+            colorsOrQuantity.forEach(color => {
+                this.createColorBlock(color);
+            });
+        }
+        this.splitIntoRows(this.colorContainer);
     }
     refreshColors() {
-        this.allElements.forEach(colorBlock => {
-            if(!colorBlock.isLocked) colorBlock.updateColor();
-        })
+        this.allElements.forEach(colorBlock => this.allElements.forEach(colorBlock => !colorBlock.IsLocked && colorBlock.updateColor()))
+        this.updateHash()
     }
     keydownHandler() {
         window.addEventListener('keydown', (e) => {
@@ -78,5 +101,107 @@ export class App implements IApp {
                 this.refreshColors();
             }
         })
+        this.refreshButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.refreshColors();
+        })
     }
+    getQuantityColors = (): number => {
+        return parseInt(this.inputQuantity?.value);
+    }
+    quantityInputHandler() {
+        this.inputQuantity.addEventListener('change', this.changeInputQuantity)
+
+        this.inputQuantity.addEventListener('input', () => {
+            const value = this.getQuantityColors();
+            if (value < this.minQuantity) {
+                this.inputQuantity.value = this.minQuantity.toString();
+                this.refreshCurrentQuantity();
+            }
+        });
+    }
+    changeInputQuantity = () => {
+        this.refreshCurrentQuantity();
+        this.updateColorBlocks();
+    }
+    updateColorBlocks() {
+        const diff = this.currentQuantity - this.allElements.length;
+        if (diff > 0) {
+            this.createColorBlocks(diff);
+        } else if (diff < 0) {
+            for (let i = 0; i < -diff; i++) {
+                const colorBlock = this.unlockedElements.pop();
+                if (colorBlock) {
+                    colorBlock.remove();
+                    this.allElements = this.allElements.filter(el => el !== colorBlock);
+                }
+            }
+        }
+        this.updateHash()
+        this.splitIntoRows(this.colorContainer);
+    }
+    updateMinQuantity() {
+        this.minQuantity = this.lockedElements.length;
+        if(parseInt(this.inputQuantity.value) < this.minQuantity) this.inputQuantity.value = this.maxQuantity.toString();
+        this.labelQuantity.innerText = this.getQuantityColors().toString();
+        this.refreshCurrentQuantity();
+    }
+
+    refreshCurrentQuantity() {
+        this.currentQuantity = this.getQuantityColors();
+        this.labelQuantity.innerText = this.currentQuantity.toString();
+        this.updateHash()
+    }
+    updateHash() {
+        let colors = this.allElements.map(el => el.color);
+        let colorsString = JSON.stringify(colors);
+        let colorsHash = btoa(colorsString); // преобразование в base64
+        window.history.pushState(null, "", `#${colorsHash}`);
+    }
+
+    splitIntoRows(container: HTMLElement) {
+        let colorBlocks = Array.from(container.querySelectorAll('.color'));
+        let rows = container.querySelectorAll('.grid-row');
+
+        rows.forEach(row => {
+            row.remove();
+        });
+
+        let totalColors = colorBlocks.length;
+        let itemsPerRow;
+
+        if (totalColors <= 7) {
+            itemsPerRow = totalColors;
+        } else if (totalColors <= 8) {
+            itemsPerRow = Math.ceil(totalColors / 2);
+        } else if (totalColors <= 9) {
+            itemsPerRow = 3;
+        } else {
+            itemsPerRow = 5;
+        }
+
+        let numRows = Math.ceil(totalColors / itemsPerRow);
+
+        for(let i = 0; i < numRows; i++){
+            let row = addElement({
+                parent: container,
+                classNames: "grid-row",
+            }) as HTMLElement;
+
+            row.style.display = "grid";
+            row.style.gridTemplateColumns = "repeat(auto-fit, minmax(100px, 1fr))";
+
+            for(let j = 0; j < itemsPerRow; j++){
+                let blockIndex = i * itemsPerRow + j;
+                if(colorBlocks[blockIndex]){
+                    row.appendChild(colorBlocks[blockIndex]);
+                }
+            }
+        }
+    }
+
+
+
+
 }
+

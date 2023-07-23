@@ -11,7 +11,11 @@
 <body>
     <div id="app">
         <nav class="navbar">
-            <input type="range" min="1" max="10" class="colors-quantity" value="5"/>
+            <div class="quantity">
+                <label for="colors-quantity"></label>
+                <input name="colors-quantity" id="colors-quantity" type="range" min="1" max="10" class="colors-quantity"/>
+            </div>
+            <button id="all-refresh"><i class="fa-solid fa-arrows-rotate"></i></button>
         </nav>
         <div id="colors"></div>
     </div>

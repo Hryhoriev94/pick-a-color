@@ -52,6 +52,6 @@ export const isDark = (color: number[] | string):boolean => {
     let y = Math.round((r * 299 + g * 587 + b * 114) / 1000);
 
     return y < 100;
-
 }
+
 

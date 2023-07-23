@@ -11,17 +11,17 @@ export interface IColorBlockClassNames {
 }
 
 export interface IApp {
-    colorElements: [],
+    colorContainer: HTMLElement,
     quantityElements: [],
     allElements: ColorBlock[],
     lockedElements: ColorBlock[],
     unlockedElements: ColorBlock[],
-
+    refreshButton: HTMLButtonElement,
     refreshColors(): void;
 }
 
 export interface addElementParameters {
-    parent?: HTMLElement,
+    parent?: HTMLElement | null,
     tag?: string,
     content?: Content,
     classNames?: classNames,
@@ -32,7 +32,6 @@ export interface IColorBlock {
     body: HTMLElement;
     rgbName: HTMLElement;
     hexName: HTMLElement;
-    isLocked: boolean;
     colorNames: HTMLElement;
     button: HTMLElement;
     icon: HTMLElement;
