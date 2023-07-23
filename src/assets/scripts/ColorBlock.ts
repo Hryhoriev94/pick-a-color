@@ -1,13 +1,11 @@
-import {rgbColor, hexColor} from "./types";
-import {colorBlockClassNames} from "./interfaces";
+import {hexColor, rgbColor} from "./types";
+import {IColorBlock, IColorBlockClassNames} from "./interfaces";
 import {isDark, rgbToHex} from "./functions";
 import {addElement} from "./dom";
 
-export class ColorBlock {
+export class ColorBlock implements IColorBlock {
     color: rgbColor;
     hexColor: hexColor;
-
-
     body: HTMLElement;
     rgbName: HTMLElement;
     hexName: HTMLElement;
@@ -16,8 +14,9 @@ export class ColorBlock {
     button: HTMLElement;
     icon: HTMLElement;
 
-    classes: colorBlockClassNames;
-    constructor(color:rgbColor, isLocked: boolean) {
+    classes: IColorBlockClassNames;
+
+    constructor(color: rgbColor, isLocked: boolean) {
         this.color = color;
         this.hexColor = rgbToHex(this.color);
         this.isLocked = isLocked;
@@ -30,11 +29,22 @@ export class ColorBlock {
         }
         this.init();
     }
-    init() {
+
+    init():void {
         this.body = addElement({parent: document.querySelector('#colors'), classNames: this.classes.colorBlockClasses});
         this.colorNames = addElement({parent: this.body, classNames: this.classes.colorNames});
-        this.rgbName = addElement({parent: this.colorNames, tag: 'h2', content: `rgb(${this.color})`, classNames: this.classes.rgbName});
-        this.hexName = addElement({parent: this.colorNames, tag: 'h2', content: `${this.hexColor}`, classNames: this.classes.hexName});
+        this.rgbName = addElement({
+            parent: this.colorNames,
+            tag: 'h2',
+            content: `rgb(${this.color})`,
+            classNames: this.classes.rgbName
+        });
+        this.hexName = addElement({
+            parent: this.colorNames,
+            tag: 'h2',
+            content: `${this.hexColor}`,
+            classNames: this.classes.hexName
+        });
         this.button = addElement({parent: this.body, tag: 'button'});
         this.icon = addElement({parent: this.button, tag: 'i', classNames: this.classes.iconClasses})
 
@@ -44,20 +54,23 @@ export class ColorBlock {
             this.updateLockState();
         })
     }
-    getBodyClassNames():string[] {
+
+    getBodyClassNames(): string[] {
         const classNames = ['color'];
-           if(isDark(this.color)) {
-               classNames.push('dark')
-           }
-           if(this.isLocked) {
-               classNames.push('color-locked')
-           }
-           return classNames;
+        if (isDark(this.color)) {
+            classNames.push('dark')
         }
-    getIconClasses():string[] {
+        if (this.isLocked) {
+            classNames.push('color-locked')
+        }
+        return classNames;
+    }
+
+    getIconClasses(): string[] {
         return this.isLocked ? ['fa-solid', 'fa-lock'] : ['fa-solid', 'fa-lock-open']
     }
-    updateLockState() {
+
+    updateLockState():void {
 
         const colorBlockClasses = [...this.getBodyClassNames()]
         const iconClasses = this.getIconClasses();
@@ -69,7 +82,7 @@ export class ColorBlock {
         this.icon.className = '';
 
         this.body.classList.add(...colorBlockClasses);
-        this.icon.classList.add(...iconClasses)
+        this.icon.classList.add(...iconClasses);
     }
 
 }

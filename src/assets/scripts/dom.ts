@@ -1,6 +1,5 @@
-import {getRandomColor, isDark, rgbToHex} from "./functions";
-import {Content, classNames, rgbColor, hexColor} from './types'
-import {addElementParameters, colorBlockClassNames} from "./interfaces";
+import {getRandomColor} from "./functions";
+import {addElementParameters, IApp} from "./interfaces";
 import {ColorBlock} from "./ColorBlock";
 
 export const app: HTMLElement = document.querySelector('#app');
@@ -84,3 +83,13 @@ export const spaceHandler = () => {
     return;
 }
 
+export class App implements IApp {
+    colorElements;
+    quantityElements;
+    allElements;
+    lockedElements;
+    unlockedElements;
+    constructor() {
+
+    }
+}

@@ -1,7 +1,7 @@
 import {classNames, Content} from "./types";
 
 
-export interface colorBlockClassNames {
+export interface IColorBlockClassNames {
     colorBlockClasses: classNames,
     colorNames: classNames,
     rgbName: classNames,
@@ -9,7 +9,7 @@ export interface colorBlockClassNames {
     iconClasses: classNames
 }
 
-export interface App {
+export interface IApp {
     colorElements: [],
     quantityElements: [],
     allElements: [],
@@ -23,4 +23,19 @@ export interface addElementParameters {
     content?: Content,
     classNames?: classNames,
     place?: 'append' | 'prepend' | 'before' | 'after'
+}
+
+export interface IColorBlock {
+    body: HTMLElement;
+    rgbName: HTMLElement;
+    hexName: HTMLElement;
+    isLocked: boolean;
+    colorNames: HTMLElement;
+    button: HTMLElement;
+    icon: HTMLElement;
+    classes: IColorBlockClassNames;
+
+    init(): void;
+    getBodyClassNames(): string[];
+    updateLockState(): void
 }
