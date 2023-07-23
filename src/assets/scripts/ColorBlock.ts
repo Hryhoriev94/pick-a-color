@@ -101,6 +101,10 @@ export class ColorBlock implements IColorBlock {
         this.updateContent(this.hexName, this.hexColor);
 
         this.body.style.backgroundColor = `rgb(${this.color})`;
+
+        this.body.className = '';
+        const colorBlockClasses = [...this.getBodyClassNames()]
+        this.body.classList.add(...colorBlockClasses);
     }
 
     get IsLocked(): boolean {
