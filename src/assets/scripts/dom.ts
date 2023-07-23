@@ -1,18 +1,7 @@
 import {getRandomColor, isDark, rgbToHex} from "./functions";
 import {Content, classNames, rgbColor, hexColor} from './types'
-import {colorBlockClassNames} from "./interfaces";
+import {addElementParameters, colorBlockClassNames} from "./interfaces";
 import {ColorBlock} from "./ColorBlock";
-
-
-interface addElementParameters {
-    parent?: HTMLElement,
-    tag?: string,
-    content?: Content,
-    classNames?: classNames,
-    place?: 'append' | 'prepend' | 'before' | 'after'
-}
-
-
 
 export const app: HTMLElement = document.querySelector('#app');
 
@@ -68,7 +57,7 @@ export const generateColors = (init = true) => {
     const unlockedColors:NodeList = getUnlockedColors();
 
     const quantity = getQuantityColors() - lockedColors.length;
-    console.log(quantity);
+
     unlockedColors.forEach(unlockedColor => (unlockedColor as Element).remove());
 
     for(let i = 0; i < quantity; i++) {
