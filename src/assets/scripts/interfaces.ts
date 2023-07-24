@@ -3,10 +3,11 @@ import {ColorBlock} from "./ColorBlock";
 
 
 export interface IColorBlockClassNames {
+    lockButtonClasses?: classNames,
     colorBlockClasses: classNames,
-    colorNames: classNames,
-    rgbName: classNames,
-    hexName: classNames,
+    colorNamesClasses: classNames,
+    rgbNameClasses: classNames,
+    hexNameClasses: classNames,
     iconClasses: classNames
 }
 
@@ -33,11 +34,10 @@ export interface IColorBlock {
     rgbName: HTMLElement;
     hexName: HTMLElement;
     colorNames: HTMLElement;
-    button: HTMLElement;
+    lockButton: HTMLElement;
     icon: HTMLElement;
     classes: IColorBlockClassNames;
 
     init(): void;
-    getBodyClassNames(): string[];
-    updateLockState(): void
+    updateLockState(): void;
 }
