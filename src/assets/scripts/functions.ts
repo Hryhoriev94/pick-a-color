@@ -54,4 +54,14 @@ export const isDark = (color: number[] | string):boolean => {
     return y < 100;
 }
 
+export function debounce(func, delay) {
+    let debounceTimer;
+    return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    }
+}
+
 

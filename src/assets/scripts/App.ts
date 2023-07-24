@@ -1,8 +1,13 @@
 import {IApp} from "./interfaces";
 import {ColorBlock} from "./ColorBlock";
-import {getRandomColor} from "./functions";
+import {debounce, getRandomColor} from "./functions";
 import {rgbColor} from "./types";
 import {addElement} from "./dom";
+
+const variables = {
+    gridSize: 1200
+}
+
 
 export class App implements IApp {
     colorContainer: HTMLElement;
@@ -17,6 +22,7 @@ export class App implements IApp {
     labelQuantity: HTMLElement;
     refreshButton: HTMLButtonElement;
     constructor() {
+
         this.inputQuantity = document.querySelector('#colors-quantity');
         this.minQuantity = this.lockedElements.length;
         this.currentQuantity = this.getQuantityColors();
@@ -29,6 +35,7 @@ export class App implements IApp {
         this.init();
     }
     init() {
+        window.addEventListener('resize', debounce(this.updateLayout, 100));
         let hash = window.location.hash.substr(1);
         if (hash) {
             let colorsString = atob(hash);
@@ -39,7 +46,8 @@ export class App implements IApp {
         }
         this.keydownHandler();
         this.quantityInputHandler();
-        this.updateHash()
+        this.updateHash();
+        this.updateLayout();
     }
     createColorBlock(color = getRandomColor(), isLocked = false) {
         const colorBlock = new ColorBlock(color, isLocked, this);
@@ -114,7 +122,6 @@ export class App implements IApp {
         this.labelQuantity.innerText = this.getQuantityColors().toString();
         this.refreshCurrentQuantity();
     }
-
     refreshCurrentQuantity() {
         this.currentQuantity = this.getQuantityColors();
         this.labelQuantity.innerText = this.currentQuantity.toString();
@@ -126,7 +133,6 @@ export class App implements IApp {
         let colorsHash = btoa(colorsString);
         window.history.pushState(null, "", `#${colorsHash}`);
     }
-
     splitIntoRows(container: HTMLElement) {
         let colorBlocks = Array.from(container.querySelectorAll('.color'));
         let rows = container.querySelectorAll('.grid-row');
@@ -167,5 +173,31 @@ export class App implements IApp {
             }
         }
     }
+    updateLayout = () => {
+        if (window.innerWidth <= variables.gridSize) {
+            this.destroyGrid();
+        } else {
+            this.createGrid();
+        }
+    }
 
+    createGrid() {
+        if (window.innerWidth > variables.gridSize) {
+            this.splitIntoRows(this.colorContainer);
+        }
+    }
+
+    destroyGrid() {
+        let rows = Array.from(this.colorContainer.querySelectorAll('.grid-row'));
+
+        rows.forEach(row => {
+            let colorBlocks = Array.from(row.querySelectorAll('.color'));
+
+            colorBlocks.forEach(block => {
+                this.colorContainer.append(block);
+            });
+
+            row.remove();
+        });
+    }
 }

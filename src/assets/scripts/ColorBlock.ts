@@ -20,6 +20,7 @@ export class ColorBlock implements IColorBlock {
     constructor(color: rgbColor = getRandomColor(), isLocked: boolean, app: App) {
         this.app = app;
         this.color = color;
+        this.hexColor = rgbToHex(this.color);
         this._isLocked = isLocked;
         this.init();
     }
@@ -36,7 +37,11 @@ export class ColorBlock implements IColorBlock {
 
     init(): void {
         this.classes = this.getClasses();
+        this.createElements();
+        this.addEventListeners();
+    }
 
+    createElements(): void {
         const {colorBlockClasses, colorNamesClasses, rgbNameClasses, hexNameClasses, iconClasses} = this.classes;
 
         this.body = addElement({parent: this.app.colorContainer, classNames: colorBlockClasses});
@@ -47,6 +52,9 @@ export class ColorBlock implements IColorBlock {
         this.icon = addElement({parent: this.lockButton, tag: 'i', classNames: iconClasses});
 
         this.body.style.backgroundColor = `rgb(${this.color})`;
+    }
+
+    addEventListeners(): void {
         this.lockButton.addEventListener('click', this.toggleLockState);
         this.rgbName.addEventListener('click', () => this.copyColor(this.rgbName));
         this.hexName.addEventListener('click', () => this.copyColor(this.hexName));
