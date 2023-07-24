@@ -1,13 +1,14 @@
 const path = require('path');
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const isDevMode = process.env.NODE_ENV === 'development';
 const isProdMode = !isDevMode;
 
 const filename = extension => isDevMode ? `[name].${extension}` : `[name].[hash].${extension}`;
 const plugins = () => {
     const base = [
+        new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             template: './index.html',
             minify: {
