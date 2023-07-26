@@ -99,6 +99,7 @@ export class App implements IApp {
     changeInputQuantity = () => {
         this.refreshCurrentQuantity();
         this.updateColorBlocks();
+        this.updateLayout();
     }
     updateColorBlocks() {
         const diff = this.currentQuantity - this.allElements.length;
