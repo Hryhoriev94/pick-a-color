@@ -7,7 +7,7 @@ This project is a web application that generates various color blocks. Users can
 <li>Ability to control the number of generated blocks.</li>
 <li>Ability to refresh the color of blocks with one click.</li>
 <li>The codes of the generated colors are added to the URL hash, enabling sharing.
-Technologies:</li>
+</li>
 <li>The project is written in TypeScript and uses Webpack for bundling. SASS is used for styling.</li>
 </ul>
 
